@@ -12,6 +12,9 @@ using Swashbuckle.AspNetCore.Annotations;
 using System;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using LivriaBackend.users.Domain.Model.Commands;
+using LivriaBackend.users.Domain.Model.Queries;
+using LivriaBackend.users.Domain.Model.Services;
 
 namespace LivriaBackend.commerce.Interfaces.REST.Controllers
 {
@@ -27,6 +30,8 @@ namespace LivriaBackend.commerce.Interfaces.REST.Controllers
     {
         private readonly IBookQueryService _bookQueryService;
         private readonly IBookCommandService _bookCommandService;
+        private readonly IUserClientCommandService _userClientCommandService;
+        private readonly IUserClientQueryService _userClientQueryService;
         private readonly IMapper _mapper;
 
         /// <summary>
@@ -34,11 +39,20 @@ namespace LivriaBackend.commerce.Interfaces.REST.Controllers
         /// </summary>
         /// <param name="bookQueryService">El servicio de consulta de libros.</param>
         /// <param name="bookCommandService">El servicio de comandos de libros.</param>
+        /// <param name="userClientCommandService">Servicio de comandos de usuario (libros leídos).</param>
+        /// <param name="userClientQueryService">Servicio de consulta de usuario (libros leídos).</param>
         /// <param name="mapper">La instancia de AutoMapper para la transformación de objetos.</param>
-        public BooksController(IBookQueryService bookQueryService, IBookCommandService bookCommandService, IMapper mapper)
+        public BooksController(
+            IBookQueryService bookQueryService,
+            IBookCommandService bookCommandService,
+            IUserClientCommandService userClientCommandService,
+            IUserClientQueryService userClientQueryService,
+            IMapper mapper)
         {
             _bookQueryService = bookQueryService;
             _bookCommandService = bookCommandService;
+            _userClientCommandService = userClientCommandService;
+            _userClientQueryService = userClientQueryService;
             _mapper = mapper;
         }
 
@@ -257,6 +271,57 @@ namespace LivriaBackend.commerce.Interfaces.REST.Controllers
     
             var resource = _mapper.Map<BookResource>(result);
             return Ok(resource);
+        }
+
+        /// <summary>
+        /// Obtiene los libros marcados como leídos por un usuario (Mis libros).
+        /// </summary>
+        [Authorize(Roles = "UserClient,Admin")]
+        [HttpGet("read/{userClientId:int}")]
+        [SwaggerOperation(
+            Summary = "Obtener libros leídos de un usuario.",
+            Description = "Devuelve la lista de libros que el usuario marcó como leídos."
+        )]
+        [ProducesResponseType(typeof(IEnumerable<BookResource>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<IEnumerable<BookResource>>> GetReadBooks(int userClientId)
+        {
+            try
+            {
+                var books = await _userClientQueryService.Handle(new GetReadBooksByUserQuery(userClientId));
+                return Ok(_mapper.Map<IEnumerable<BookResource>>(books));
+            }
+            catch (ArgumentException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Marca o desmarca un libro como leído (toggle).
+        /// </summary>
+        [Authorize(Roles = "UserClient,Admin")]
+        [HttpPatch("{bookId:int}/read/toggle")]
+        [SwaggerOperation(
+            Summary = "Toggle libro leído.",
+            Description = "Si el libro no está leído lo marca; si ya está leído lo desmarca."
+        )]
+        [ProducesResponseType(typeof(ToggleReadBookResponseResource), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<ToggleReadBookResponseResource>> ToggleReadBook(
+            int bookId,
+            [FromBody] ToggleReadBookResource resource)
+        {
+            try
+            {
+                var result = await _userClientCommandService.Handle(
+                    new ToggleReadBookCommand(resource.UserClientId, bookId));
+                return Ok(new ToggleReadBookResponseResource(result.BookId, result.IsRead));
+            }
+            catch (ArgumentException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
         }
     }
 }

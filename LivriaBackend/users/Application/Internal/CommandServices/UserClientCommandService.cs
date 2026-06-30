@@ -299,6 +299,23 @@ namespace LivriaBackend.users.Application.Internal.CommandServices
 
             return userClient;
         }
+
+        public async Task<ToggleReadBookResult> Handle(ToggleReadBookCommand command)
+        {
+            var userClient = await _userClientRepository.GetByIdAsync(command.UserClientId);
+            if (userClient == null)
+                throw new ArgumentException($"UserClient with ID {command.UserClientId} not found.");
+
+            var book = await _bookRepository.GetByIdAsync(command.BookId);
+            if (book == null)
+                throw new ArgumentException($"Book with ID {command.BookId} not found.");
+
+            var isRead = userClient.ToggleReadBook(book);
+            await _userClientRepository.UpdateAsync(userClient);
+            await _unitOfWork.CompleteAsync();
+
+            return new ToggleReadBookResult(book.Id, isRead);
+        }
         
         /// <summary>
         /// Maneja el comando para actualizar el plan de suscripción de un cliente de usuario.

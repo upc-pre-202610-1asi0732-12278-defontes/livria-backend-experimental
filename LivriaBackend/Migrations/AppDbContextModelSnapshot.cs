@@ -49,6 +49,21 @@ namespace LivriaBackend.Migrations
                     b.ToTable("user_exclusion_books", (string)null);
                 });
 
+            modelBuilder.Entity("BookUserClient2", b =>
+                {
+                    b.Property<int>("ReadBooksId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UserClientId")
+                        .HasColumnType("int");
+
+                    b.HasKey("ReadBooksId", "UserClientId");
+
+                    b.HasIndex("UserClientId");
+
+                    b.ToTable("user_read_books", (string)null);
+                });
+
             modelBuilder.Entity("LivriaBackend.IAM.Domain.Model.Aggregates.Identity", b =>
                 {
                     b.Property<int>("Id")
@@ -641,6 +656,21 @@ namespace LivriaBackend.Migrations
                     b.HasOne("LivriaBackend.users.Domain.Model.Aggregates.UserClient", null)
                         .WithMany()
                         .HasForeignKey("UserClient1Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("BookUserClient2", b =>
+                {
+                    b.HasOne("LivriaBackend.commerce.Domain.Model.Aggregates.Book", null)
+                        .WithMany()
+                        .HasForeignKey("ReadBooksId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("LivriaBackend.users.Domain.Model.Aggregates.UserClient", null)
+                        .WithMany()
+                        .HasForeignKey("UserClientId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using LivriaBackend.commerce.Domain.Model.Aggregates;
 using LivriaBackend.users.Domain.Model.Aggregates;
 using LivriaBackend.users.Domain.Model.Queries;
 
@@ -40,5 +41,10 @@ namespace LivriaBackend.users.Domain.Model.Services
         /// <param name="email">Normalized email to check, or null to skip.</param>
         /// <param name="username">Normalized username to check, or null to skip.</param>
         Task<UserClientAvailability> GetRegistrationAvailabilityAsync(string? email, string? username);
+
+        /// <summary>
+        /// Obtiene los libros marcados como leídos por un usuario.
+        /// </summary>
+        Task<IEnumerable<Book>> Handle(GetReadBooksByUserQuery query);
     }
 }

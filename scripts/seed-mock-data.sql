@@ -30,6 +30,7 @@ DELETE FROM `user_communities` WHERE `CommunityId` = 201;
 DELETE FROM `notifications`  WHERE `Id` BETWEEN 601 AND 699;
 DELETE FROM `reviews`        WHERE `Id` BETWEEN 501 AND 599;
 DELETE FROM `cart_items`     WHERE `Id` BETWEEN 801 AND 899;
+DELETE FROM `user_read_books` WHERE `UserClientId` IN (3, 4, 5);
 DELETE FROM `user_favorite_books` WHERE `UserClientId` IN (3, 4, 5);
 DELETE FROM `user_exclusion_books` WHERE `UserClient1Id` IN (3, 4, 5);
 DELETE FROM `Identities`     WHERE `UserId` IN (3, 4, 5);
@@ -83,6 +84,10 @@ INSERT INTO `books` (`Id`, `Title`, `Description`, `Author`, `SalePrice`, `Purch
 INSERT INTO `user_favorite_books` (`UserClientId`, `FavoriteBooksId`) VALUES
   (3, 101), (3, 104),
   (5, 102);
+
+INSERT INTO `user_read_books` (`UserClientId`, `ReadBooksId`) VALUES
+  (3, 101), (3, 102),
+  (4, 103);
 
 -- ---------------------------------------------------------------------------
 -- Comunidad, membresías, posts, comentarios (con y sin img)

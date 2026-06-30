@@ -111,6 +111,14 @@ namespace LivriaBackend.shared.Infrastructure.Persistence.EFC.Configuration
                 entity.HasMany(uc => uc.ExclusionBooks)
                     .WithMany()
                     .UsingEntity(j => j.ToTable("user_exclusion_books"));
+
+                entity.HasMany(uc => uc.ReadBooks)
+                    .WithMany()
+                    .UsingEntity<Dictionary<string, object>>(
+                        "user_read_books",
+                        j => j.HasOne<Book>().WithMany().HasForeignKey("ReadBooksId"),
+                        j => j.HasOne<UserClient>().WithMany().HasForeignKey("UserClientId"),
+                        j => j.HasKey("ReadBooksId", "UserClientId"));
                 
             });
 

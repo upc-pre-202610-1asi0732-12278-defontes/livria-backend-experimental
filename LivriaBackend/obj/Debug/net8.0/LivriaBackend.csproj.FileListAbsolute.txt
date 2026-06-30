@@ -325,3 +325,4 @@ C:\Users\alext\proyectos\livria-backend-experimental\LivriaBackend\obj\Debug\net
 C:\Users\alext\proyectos\livria-backend-experimental\LivriaBackend\obj\Debug\net8.0\ref\LivriaBackend.dll
 C:\Users\alext\proyectos\livria-backend-experimental\LivriaBackend\bin\Debug\net8.0\DotNetEnv.dll
 C:\Users\alext\proyectos\livria-backend-experimental\LivriaBackend\bin\Debug\net8.0\Sprache.dll
+C:\Users\alext\proyectos\livria-backend-experimental\LivriaBackend\bin\Debug\net8.0\LivriaBackend.exe

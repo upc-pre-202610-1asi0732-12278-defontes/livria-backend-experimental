@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using LivriaBackend.commerce.Domain.Model.Aggregates;
 using LivriaBackend.users.Domain.Model.Aggregates;
 using LivriaBackend.users.Domain.Model.Queries;
 using LivriaBackend.users.Domain.Model.Repositories;
@@ -76,6 +77,15 @@ namespace LivriaBackend.users.Application.Internal.QueryServices
                 EmailAvailable = emailAvailable,
                 UsernameAvailable = usernameAvailable
             };
+        }
+
+        public async Task<IEnumerable<Book>> Handle(GetReadBooksByUserQuery query)
+        {
+            var userClient = await _userClientRepository.GetByIdAsync(query.UserClientId);
+            if (userClient == null)
+                throw new ArgumentException($"UserClient with ID {query.UserClientId} not found.");
+
+            return userClient.ReadBooks;
         }
     }
 }

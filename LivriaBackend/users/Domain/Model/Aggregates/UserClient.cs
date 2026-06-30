@@ -67,6 +67,13 @@ namespace LivriaBackend.users.Domain.Model.Aggregates
         /// </summary>
         public IReadOnlyCollection<Book> ExclusionBooks => _exclusionBooks.AsReadOnly();
 
+        private readonly List<Book> _readBooks = new List<Book>();
+
+        /// <summary>
+        /// Libros marcados como leídos por el usuario (Mis libros).
+        /// </summary>
+        public IReadOnlyCollection<Book> ReadBooks => _readBooks.AsReadOnly();
+
 
         /// <summary>
         /// Constructor protegido sin parámetros, típicamente utilizado por ORMs como Entity Framework Core.
@@ -263,6 +270,24 @@ namespace LivriaBackend.users.Domain.Model.Aggregates
                 throw new ArgumentNullException(nameof(book));
             }
             _exclusionBooks.Remove(book);
+        }
+
+        /// <summary>
+        /// Alterna el estado leído de un libro. Devuelve true si quedó marcado como leído, false si se desmarcó.
+        /// </summary>
+        public bool ToggleReadBook(Book book)
+        {
+            if (book == null)
+                throw new ArgumentNullException(nameof(book));
+
+            if (_readBooks.Contains(book))
+            {
+                _readBooks.Remove(book);
+                return false;
+            }
+
+            _readBooks.Add(book);
+            return true;
         }
     }
 }

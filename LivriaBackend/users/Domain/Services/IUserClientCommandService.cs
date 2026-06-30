@@ -81,6 +81,11 @@ namespace LivriaBackend.users.Domain.Model.Services
         Task<UserClient> Handle(RemoveExclusionBookCommand command);
 
         /// <summary>
+        /// Marca o desmarca un libro como leído (toggle).
+        /// </summary>
+        Task<ToggleReadBookResult> Handle(ToggleReadBookCommand command);
+
+        /// <summary>
         /// Maneja el comando para actualizar el plan de suscripción de un cliente de usuario.
         /// </summary>
         /// <param name="command">El comando <see cref="UpdateUserClientSubscriptionCommand"/> que contiene el ID del usuario y el nuevo plan de suscripción.</param>

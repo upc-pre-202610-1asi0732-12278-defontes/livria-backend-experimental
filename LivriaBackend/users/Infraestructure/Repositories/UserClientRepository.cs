@@ -40,6 +40,7 @@ namespace LivriaBackend.users.Infrastructure.Repositories
                 .Include(uc => uc.UserCommunities)
                 .Include(uc => uc.FavoriteBooks)
                 .Include(uc => uc.ExclusionBooks)
+                .Include(uc => uc.ReadBooks)
                 .FirstOrDefaultAsync(uc => uc.Id == id);
         }
 
@@ -58,6 +59,7 @@ namespace LivriaBackend.users.Infrastructure.Repositories
                 .Include(uc => uc.UserCommunities)
                 .Include(uc => uc.FavoriteBooks)
                 .Include(uc => uc.ExclusionBooks)
+                .Include(uc => uc.ReadBooks)
                 .ToListAsync();
         }
 
@@ -111,6 +113,7 @@ namespace LivriaBackend.users.Infrastructure.Repositories
                 .Include(uc => uc.UserCommunities)
                 .Include(uc => uc.FavoriteBooks)
                 .Include(uc => uc.ExclusionBooks)
+                .Include(uc => uc.ReadBooks)
                 .FirstOrDefaultAsync(uc => uc.Username == username);
         }
 
