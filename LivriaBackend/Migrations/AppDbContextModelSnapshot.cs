@@ -144,6 +144,13 @@ namespace LivriaBackend.Migrations
                     b.Property<bool>("IsDelivery")
                         .HasColumnType("tinyint(1)");
 
+                    b.Property<string>("PaymentMethod")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar(20)")
+                        .HasDefaultValue("external");
+
                     b.Property<string>("RecipientName")
                         .IsRequired()
                         .HasMaxLength(255)
@@ -509,6 +516,56 @@ namespace LivriaBackend.Migrations
                     b.UseTptMappingStrategy();
                 });
 
+            modelBuilder.Entity("LivriaBackend.wallet.Domain.Model.Aggregates.WalletTransaction", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<string>("AdminNote")
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(10, 2)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int?>("OrderId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("ProcessedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("ProofUrl")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)");
+
+                    b.Property<string>("Reference")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<int>("UserClientId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserClientId");
+
+                    b.ToTable("wallet_transactions", (string)null);
+                });
+
             modelBuilder.Entity("LivriaBackend.users.Domain.Model.Aggregates.UserAdmin", b =>
                 {
                     b.HasBaseType("LivriaBackend.users.Domain.Model.Aggregates.User");
@@ -549,6 +606,11 @@ namespace LivriaBackend.Migrations
                     b.Property<string>("Subscription")
                         .IsRequired()
                         .HasColumnType("longtext");
+
+                    b.Property<decimal>("Wallet")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("decimal(10, 2)")
+                        .HasDefaultValue(0m);
 
                     b.ToTable("userclients", (string)null);
                 });
@@ -776,6 +838,15 @@ namespace LivriaBackend.Migrations
                     b.Navigation("Community");
 
                     b.Navigation("UserClient");
+                });
+
+            modelBuilder.Entity("LivriaBackend.wallet.Domain.Model.Aggregates.WalletTransaction", b =>
+                {
+                    b.HasOne("LivriaBackend.users.Domain.Model.Aggregates.UserClient", null)
+                        .WithMany()
+                        .HasForeignKey("UserClientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("LivriaBackend.users.Domain.Model.Aggregates.UserAdmin", b =>

@@ -32,6 +32,8 @@ namespace LivriaBackend.commerce.Interfaces.REST.Resources
         
         bool IsDelivery,
         
+        string PaymentMethod,
+        
         ShippingResource Shipping, 
         
         decimal Total,

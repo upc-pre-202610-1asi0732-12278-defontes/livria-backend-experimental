@@ -49,10 +49,10 @@ INSERT INTO `users` (`Id`, `Display`, `Username`, `Email`) VALUES
   (4, 'Bob Libros',      'mock_bob',   'bob.mock@livria.dev'),
   (5, 'Carol Páginas',   'mock_carol', 'carol.mock@livria.dev');
 
-INSERT INTO `userclients` (`Id`, `Icon`, `Phrase`, `Subscription`, `HasPayed`, `PlanChangeDate`) VALUES
-  (3, 'https://i.pravatar.cc/150?u=mock_alice', 'Siempre con un libro en la mochila.', 'communityplan', 1, '2026-05-01 00:00:00.000000'),
-  (4, 'https://i.pravatar.cc/150?u=mock_bob',   'Leyendo ciencia ficción.',            'freeplan',      0, NULL),
-  (5, 'https://i.pravatar.cc/150?u=mock_carol', 'Club de lectura los martes.',         'communityplan', 1, '2026-05-15 00:00:00.000000');
+INSERT INTO `userclients` (`Id`, `Icon`, `Phrase`, `Subscription`, `HasPayed`, `PlanChangeDate`, `Wallet`) VALUES
+  (3, 'https://i.pravatar.cc/150?u=mock_alice', 'Siempre con un libro en la mochila.', 'communityplan', 1, '2026-05-01 00:00:00.000000', 50.00),
+  (4, 'https://i.pravatar.cc/150?u=mock_bob',   'Leyendo ciencia ficción.',            'freeplan',      0, NULL, 0.00),
+  (5, 'https://i.pravatar.cc/150?u=mock_carol', 'Club de lectura los martes.',         'communityplan', 1, '2026-05-15 00:00:00.000000', 100.00);
 
 INSERT INTO `Identities` (`Id`, `UserId`, `UserName`, `hashed_password`) VALUES
   (2, 3, 'mock_alice', @pwd_hash),

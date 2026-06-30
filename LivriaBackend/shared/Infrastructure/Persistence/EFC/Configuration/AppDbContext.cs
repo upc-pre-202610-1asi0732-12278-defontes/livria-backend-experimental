@@ -12,6 +12,8 @@ using System.Linq;
 using System.Threading; 
 using System.Threading.Tasks;
 using LivriaBackend.IAM.Domain.Model.Aggregates;
+using LivriaBackend.wallet.Domain.Model.Aggregates;
+using LivriaBackend.wallet.Domain.Model.ValueObjects;
 
 namespace LivriaBackend.shared.Infrastructure.Persistence.EFC.Configuration
 {
@@ -57,6 +59,9 @@ namespace LivriaBackend.shared.Infrastructure.Persistence.EFC.Configuration
         
         /// <summary>Representa la colección de comentarios a publicaciones en la base de datos.</summary>
         public DbSet<Comment> Comments { get; set; }
+
+        /// <summary>Representa la colección de movimientos de billetera en la base de datos.</summary>
+        public DbSet<WalletTransaction> WalletTransactions { get; set; }
         
         /// <summary>
         /// Inicializa una nueva instancia de la clase <see cref="AppDbContext"/>.
@@ -92,6 +97,10 @@ namespace LivriaBackend.shared.Infrastructure.Persistence.EFC.Configuration
                 entity.Property(uc => uc.Icon).IsRequired(false);
                 entity.Property(uc => uc.Phrase);
                 entity.Property(uc => uc.Subscription);
+                entity.Property(uc => uc.Wallet)
+                    .IsRequired()
+                    .HasColumnType("decimal(10, 2)")
+                    .HasDefaultValue(0m);
 
                 entity.HasBaseType<User>();
 
@@ -204,6 +213,7 @@ namespace LivriaBackend.shared.Infrastructure.Persistence.EFC.Configuration
                 entity.Property(o => o.UserFullName).IsRequired().HasMaxLength(255);
                 entity.Property(o => o.RecipientName).IsRequired().HasMaxLength(255);
                 entity.Property(o => o.Status).IsRequired().HasMaxLength(255);
+                entity.Property(o => o.PaymentMethod).IsRequired().HasMaxLength(20).HasDefaultValue("external");
                 entity.Property(o => o.IsDelivery).IsRequired();
                 entity.Property(o => o.Total).IsRequired().HasColumnType("decimal(10, 2)");
                 entity.Property(o => o.Date).IsRequired();
@@ -401,6 +411,29 @@ namespace LivriaBackend.shared.Infrastructure.Persistence.EFC.Configuration
                 entity.HasOne<UserClient>()
                     .WithMany()
                     .HasForeignKey(c => c.UserId)
+                    .IsRequired()
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<WalletTransaction>(entity =>
+            {
+                entity.ToTable("wallet_transactions");
+                entity.HasKey(wt => wt.Id);
+                entity.Property(wt => wt.Id).IsRequired().ValueGeneratedOnAdd();
+                entity.Property(wt => wt.UserClientId).IsRequired();
+                entity.Property(wt => wt.Amount).IsRequired().HasColumnType("decimal(10, 2)");
+                entity.Property(wt => wt.Type).IsRequired().HasConversion<string>();
+                entity.Property(wt => wt.Status).IsRequired().HasConversion<string>();
+                entity.Property(wt => wt.Reference).IsRequired().HasMaxLength(100);
+                entity.Property(wt => wt.ProofUrl).IsRequired().HasMaxLength(500);
+                entity.Property(wt => wt.OrderId).IsRequired(false);
+                entity.Property(wt => wt.CreatedAt).IsRequired();
+                entity.Property(wt => wt.ProcessedAt).IsRequired(false);
+                entity.Property(wt => wt.AdminNote).IsRequired(false).HasMaxLength(500);
+
+                entity.HasOne<UserClient>()
+                    .WithMany()
+                    .HasForeignKey(wt => wt.UserClientId)
                     .IsRequired()
                     .OnDelete(DeleteBehavior.Cascade);
             });

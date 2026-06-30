@@ -81,6 +81,11 @@ namespace LivriaBackend.commerce.Domain.Model.Aggregates
         /// </summary>
         public string Status { get; private set; }
 
+        /// <summary>
+        /// Método de pago: 'wallet' o 'external'.
+        /// </summary>
+        public string PaymentMethod { get; private set; }
+
         private readonly List<OrderItem> _items = new List<OrderItem>();
         /// <summary>
         /// Obtiene una colección de solo lectura de los ítems incluidos en esta orden.
@@ -104,6 +109,7 @@ namespace LivriaBackend.commerce.Domain.Model.Aggregates
             UserFullName = string.Empty;
             RecipientName = string.Empty;
             Status = string.Empty;
+            PaymentMethod = "external";
             Total = 0;
             Date = DateTime.UtcNow;
         }
@@ -135,7 +141,8 @@ namespace LivriaBackend.commerce.Domain.Model.Aggregates
             bool isDelivery,
             Shipping? shipping,
             List<OrderItem> orderItems,
-            string status)
+            string status,
+            string paymentMethod = "external")
         {
             if (userClientId < 0) throw new ArgumentOutOfRangeException(nameof(userClientId), "UserClient ID must be positive.");
             if (string.IsNullOrWhiteSpace(userEmail)) throw new ArgumentNullException(nameof(userEmail), "User email cannot be empty.");
@@ -152,12 +159,21 @@ namespace LivriaBackend.commerce.Domain.Model.Aggregates
                 throw new ArgumentException($"El estado de la orden debe ser '{string.Join("' o '", AllowedStatuses)}'.", nameof(status));
             }
 
+            var normalizedPaymentMethod = string.IsNullOrWhiteSpace(paymentMethod)
+                ? "external"
+                : paymentMethod.Trim().ToLowerInvariant();
+            if (normalizedPaymentMethod != "wallet" && normalizedPaymentMethod != "external")
+            {
+                throw new ArgumentException("Payment method must be 'wallet' or 'external'.", nameof(paymentMethod));
+            }
+
             UserClientId = userClientId;
             UserEmail = userEmail;
             UserPhone = userPhone;
             UserFullName = userFullName;
             RecipientName = recipientName;
             Status = status;
+            PaymentMethod = normalizedPaymentMethod;
             IsDelivery = isDelivery;
             Shipping = shipping;
 

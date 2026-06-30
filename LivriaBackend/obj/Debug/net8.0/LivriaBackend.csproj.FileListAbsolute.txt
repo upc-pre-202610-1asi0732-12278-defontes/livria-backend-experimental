@@ -164,7 +164,6 @@ C:\Users\alext\proyectos\livria-backend\LivriaBackend\obj\Debug\net8.0\ref\Livri
 C:\Users\alext\proyectos\livria-backend-experimental\LivriaBackend\bin\Debug\net8.0\appsettings.Development.json
 C:\Users\alext\proyectos\livria-backend-experimental\LivriaBackend\bin\Debug\net8.0\appsettings.json
 C:\Users\alext\proyectos\livria-backend-experimental\LivriaBackend\bin\Debug\net8.0\LivriaBackend.staticwebassets.endpoints.json
-C:\Users\alext\proyectos\livria-backend-experimental\LivriaBackend\bin\Debug\net8.0\LivriaBackend.exe
 C:\Users\alext\proyectos\livria-backend-experimental\LivriaBackend\bin\Debug\net8.0\LivriaBackend.deps.json
 C:\Users\alext\proyectos\livria-backend-experimental\LivriaBackend\bin\Debug\net8.0\LivriaBackend.runtimeconfig.json
 C:\Users\alext\proyectos\livria-backend-experimental\LivriaBackend\bin\Debug\net8.0\LivriaBackend.dll

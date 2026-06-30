@@ -42,6 +42,10 @@ namespace LivriaBackend.commerce.Domain.Model.Commands
         [Required]
         bool IsDelivery,
         
-        Shipping? ShippingDetails 
+        Shipping? ShippingDetails,
+
+        [Required(ErrorMessage = "EmptyField")]
+        [StringLength(20, ErrorMessage = "MaxLengthError")]
+        string PaymentMethod = "external"
     );
 }

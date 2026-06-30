@@ -103,6 +103,10 @@ namespace LivriaBackend.notifications.Domain.Model.Aggregates
                     Title = "Recent Likes";
                     Content = "Wow! Your recent post got a lot of likes! Wanna see?";
                     break;
+                case ENotificationType.Wallet:
+                    Title = "Wallet Updated";
+                    Content = "Your wallet recharge was approved. Funds are now available.";
+                    break;
                 case ENotificationType.Default:
                 default:
                     Title = "Notification";

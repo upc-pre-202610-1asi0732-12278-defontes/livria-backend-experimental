@@ -21,7 +21,8 @@ namespace LivriaBackend.users.Interfaces.REST.Transform
                 entity.Phrase,
                 entity.Subscription,
                 entity.PlanChangeDate,
-                entity.HasPayed
+                entity.HasPayed,
+                entity.Wallet
             );
         }
     }

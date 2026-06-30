@@ -34,6 +34,11 @@ namespace LivriaBackend.users.Domain.Model.Aggregates
         /// </summary>
         public DateTime? PlanChangeDate { get; private set; }
         public bool HasPayed { get; private set; }
+
+        /// <summary>
+        /// Saldo disponible en la billetera virtual Livria.
+        /// </summary>
+        public decimal Wallet { get; private set; }
         
 
         /// <summary>
@@ -90,7 +95,26 @@ namespace LivriaBackend.users.Domain.Model.Aggregates
             Subscription = subscription;
             HasPayed = false;
             PlanChangeDate = null;
+            Wallet = 0m;
             UserCommunities = new List<UserCommunity>();
+        }
+
+        public bool HasSufficientWalletBalance(decimal amount) => Wallet >= amount;
+
+        public void CreditWallet(decimal amount)
+        {
+            if (amount <= 0)
+                throw new ArgumentException("Amount must be positive.", nameof(amount));
+            Wallet += amount;
+        }
+
+        public void DebitWallet(decimal amount)
+        {
+            if (amount <= 0)
+                throw new ArgumentException("Amount must be positive.", nameof(amount));
+            if (Wallet < amount)
+                throw new InvalidOperationException("Insufficient wallet balance.");
+            Wallet -= amount;
         }
 
         /// <summary>

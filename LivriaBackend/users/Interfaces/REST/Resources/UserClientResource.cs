@@ -27,7 +27,9 @@ namespace LivriaBackend.users.Interfaces.REST.Resources
         
         DateTime? PlanChangeDate,
         
-        bool HasPayed
+        bool HasPayed,
+        
+        decimal Wallet
         
     ) : UserResource(Id, Display, Username, Email); 
 }

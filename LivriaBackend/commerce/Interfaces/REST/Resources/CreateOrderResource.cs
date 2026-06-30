@@ -33,7 +33,11 @@ namespace LivriaBackend.commerce.Interfaces.REST.Resources
         [Required(ErrorMessage = "EmptyField")]
         bool IsDelivery,
         
-        ShippingResource? ShippingDetails 
+        ShippingResource? ShippingDetails,
+
+        [Required(ErrorMessage = "EmptyField")]
+        [StringLength(20, ErrorMessage = "MaxLengthError")]
+        string PaymentMethod = "external"
     );
     
 }

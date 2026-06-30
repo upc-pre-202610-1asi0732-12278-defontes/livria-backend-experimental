@@ -39,6 +39,13 @@ using LivriaBackend.notifications.Interfaces.REST.Transform;
 
 using LivriaBackend.commerce.Interfaces.REST.Transform;
 
+using LivriaBackend.wallet.Domain.Repositories;
+using LivriaBackend.wallet.Infrastructure.Repositories;
+using LivriaBackend.wallet.Domain.Services;
+using LivriaBackend.wallet.Application.Internal.CommandServices;
+using LivriaBackend.wallet.Application.Internal.QueryServices;
+using LivriaBackend.wallet.Interfaces.REST.Transform;
+
 using System.Globalization;
 
 using System.Reflection;
@@ -171,6 +178,7 @@ builder.Services.AddScoped<IOrderItemRepository, OrderItemRepository>();
 builder.Services.AddScoped<IIdentityRepository, IdentityRepository>();
 builder.Services.AddScoped<IPostReactionRepository, PostReactionRepository>();
 builder.Services.AddScoped<ICommentRepository, CommentRepository>();
+builder.Services.AddScoped<IWalletTransactionRepository, WalletTransactionRepository>();
 
 // Servicios de Comandos
 builder.Services.AddScoped<IBookCommandService, BookCommandService>();
@@ -187,6 +195,8 @@ builder.Services.AddScoped<IPostReactionCommandService, PostReactionCommandServi
 builder.Services.AddScoped<ICommentCommandService, CommentCommandService>();
 builder.Services.AddScoped<IPostReactionCommandService, PostReactionCommandService>();
 builder.Services.AddScoped<ICommentCommandService, CommentCommandService>();
+builder.Services.AddScoped<IWalletCommandService, WalletCommandService>();
+builder.Services.AddScoped<IWalletQueryService, WalletQueryService>();
 
 // Servicios de Consultas
 builder.Services.AddScoped<IBookQueryService, BookQueryService>();
@@ -208,7 +218,8 @@ builder.Services.AddAutoMapper(
     typeof(UsersMappingProfile).Assembly,
     typeof(CommunitiesMappingProfile).Assembly,
     typeof(MappingNotification).Assembly,
-    typeof(MappingCommerce).Assembly
+    typeof(MappingCommerce).Assembly,
+    typeof(MappingWallet).Assembly
 );
 
 

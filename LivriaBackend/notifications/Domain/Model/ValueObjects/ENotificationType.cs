@@ -27,6 +27,10 @@
         /// </summary>
         Like,
         /// <summary>
+        /// Notificación relacionada con la billetera virtual (recarga aprobada, etc.).
+        /// </summary>
+        Wallet,
+        /// <summary>
         /// Tipo de notificación por defecto o genérica, utilizada cuando no aplica un tipo específico.
         /// </summary>
         Default 

@@ -14,7 +14,9 @@ using System.Threading.Tasks;
 using LivriaBackend.notifications.Domain.Model.Services;
 using LivriaBackend.notifications.Domain.Model.Commands;
 using LivriaBackend.notifications.Domain.Model.ValueObjects;
-using LivriaBackend.users.Domain.Model.Services; 
+using LivriaBackend.users.Domain.Model.Services;
+using LivriaBackend.wallet.Domain.Model.Aggregates;
+using LivriaBackend.wallet.Domain.Repositories;
 
 
 namespace LivriaBackend.commerce.Application.Internal.CommandServices
@@ -32,6 +34,7 @@ namespace LivriaBackend.commerce.Application.Internal.CommandServices
         private readonly IUnitOfWork _unitOfWork;
         private readonly INotificationCommandService _notificationCommandService;
         private readonly IUserAdminCommandService _userAdminCommandService;
+        private readonly IWalletTransactionRepository _walletTransactionRepository;
 
 
         /// <summary>
@@ -51,7 +54,8 @@ namespace LivriaBackend.commerce.Application.Internal.CommandServices
             IUserClientRepository userClientRepository,
             IUnitOfWork unitOfWork,
             INotificationCommandService notificationCommandService,
-            IUserAdminCommandService userAdminCommandService)
+            IUserAdminCommandService userAdminCommandService,
+            IWalletTransactionRepository walletTransactionRepository)
         {
             _orderRepository = orderRepository;
             _cartItemRepository = cartItemRepository;
@@ -60,6 +64,7 @@ namespace LivriaBackend.commerce.Application.Internal.CommandServices
             _unitOfWork = unitOfWork;
             _notificationCommandService = notificationCommandService;
             _userAdminCommandService = userAdminCommandService;
+            _walletTransactionRepository = walletTransactionRepository;
         }
 
         /// <summary>
@@ -168,8 +173,27 @@ namespace LivriaBackend.commerce.Application.Internal.CommandServices
                 command.IsDelivery,
                 shippingDetails,
                 orderItems,
-                command.Status
+                command.Status,
+                command.PaymentMethod
             );
+
+            if (string.Equals(order.PaymentMethod, "wallet", StringComparison.OrdinalIgnoreCase))
+            {
+                if (!userClient.HasSufficientWalletBalance(order.Total))
+                {
+                    throw new InvalidOperationException(
+                        $"Insufficient wallet balance. Required: {order.Total:F2}, Available: {userClient.Wallet:F2}.");
+                }
+
+                userClient.DebitWallet(order.Total);
+                await _userClientRepository.UpdateAsync(userClient);
+
+                var purchaseTransaction = WalletTransaction.CreatePurchase(
+                    command.UserClientId,
+                    order.Total,
+                    order.Code);
+                await _walletTransactionRepository.AddAsync(purchaseTransaction);
+            }
 
             await _orderRepository.AddAsync(order);
 
