@@ -8,6 +8,7 @@ namespace LivriaBackend.communities.Interfaces.REST.Resources
     public record CreateCommentResource(
         [Required] int PostId,
         [Required] int UserId,
-        [Required] string Content
+        string Content,
+        string Img
     );
 }

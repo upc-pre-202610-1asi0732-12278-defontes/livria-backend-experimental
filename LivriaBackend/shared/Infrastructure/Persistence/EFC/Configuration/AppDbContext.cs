@@ -388,6 +388,7 @@ namespace LivriaBackend.shared.Infrastructure.Persistence.EFC.Configuration
                 
                 entity.Property(c => c.Username).IsRequired().HasMaxLength(50);
                 entity.Property(c => c.Content).IsRequired().HasMaxLength(1000);
+                entity.Property(c => c.Img).IsRequired();
                 
                 entity.Property(c => c.CreatedAt).IsRequired();
                 

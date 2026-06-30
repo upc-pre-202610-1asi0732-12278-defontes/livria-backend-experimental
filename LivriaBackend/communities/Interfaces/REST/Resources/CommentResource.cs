@@ -11,6 +11,7 @@ namespace LivriaBackend.communities.Interfaces.REST.Resources
         int UserId,
         string Username,
         string Content,
+        string Img,
         DateTime CreatedAt
     );
 }

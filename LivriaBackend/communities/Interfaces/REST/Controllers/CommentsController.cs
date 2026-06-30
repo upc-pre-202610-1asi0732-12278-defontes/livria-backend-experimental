@@ -40,7 +40,8 @@ namespace LivriaBackend.communities.Interfaces.REST.Controllers
             var command = new CreateCommentCommand(
                 resource.PostId,
                 resource.UserId,
-                resource.Content
+                resource.Content ?? string.Empty,
+                resource.Img ?? string.Empty
             );
             
             var comment = await _commentCommandService.Handle(command);

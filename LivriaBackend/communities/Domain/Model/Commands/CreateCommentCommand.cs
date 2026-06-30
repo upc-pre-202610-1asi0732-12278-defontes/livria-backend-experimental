@@ -6,6 +6,7 @@
     public record CreateCommentCommand(
         int PostId,
         int UserId,
-        string Content
+        string Content,
+        string Img
     );
 }

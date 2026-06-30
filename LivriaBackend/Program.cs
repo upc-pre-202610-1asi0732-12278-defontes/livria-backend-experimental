@@ -64,6 +64,10 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using LivriaBackend.IAM.Application.Internal.CommandServices;
 using LivriaBackend.IAM.Domain.Model.Aggregates;
+using DotNetEnv;
+
+// Carga .env desde el directorio actual o padres (raíz del repo).
+Env.TraversePath().Load();
 
 var builder = WebApplication.CreateBuilder(args);
 

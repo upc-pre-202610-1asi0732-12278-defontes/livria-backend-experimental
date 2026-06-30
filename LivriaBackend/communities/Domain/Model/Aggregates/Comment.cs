@@ -34,6 +34,11 @@ namespace LivriaBackend.communities.Domain.Model.Aggregates
         public string Content { get; private set; }
 
         /// <summary>
+        /// Obtiene la URL de la imagen o GIF asociado al comentario, si lo hay.
+        /// </summary>
+        public string Img { get; private set; }
+
+        /// <summary>
         /// Obtiene la fecha y hora de creación del comentario en formato UTC.
         /// </summary>
         public DateTime CreatedAt { get; private set; } 
@@ -52,18 +57,23 @@ namespace LivriaBackend.communities.Domain.Model.Aggregates
         /// <param name="userId">El identificador del usuario autor.</param>
         /// <param name="username">El nombre de usuario del autor.</param>
         /// <param name="content">El contenido de texto del comentario.</param>
-        public Comment(int postId, int userId, string username, string content)
+        /// <param name="img">La URL de la imagen o GIF del comentario. Puede ser nula o vacía.</param>
+        public Comment(int postId, int userId, string username, string content, string img)
         {
-            if (string.IsNullOrWhiteSpace(content))
+            var normalizedContent = content ?? string.Empty;
+            var normalizedImg = img ?? string.Empty;
+
+            if (string.IsNullOrWhiteSpace(normalizedContent) && string.IsNullOrWhiteSpace(normalizedImg))
             {
-                throw new ArgumentException("Comment content cannot be empty.", nameof(content));
+                throw new ArgumentException("Comment must include content or an image.", nameof(content));
             }
 
             PostId = postId;
             UserId = userId;
             Username = username;
-            Content = content;
-            CreatedAt = DateTime.UtcNow; 
+            Content = normalizedContent;
+            Img = normalizedImg;
+            CreatedAt = DateTime.UtcNow;
         }
         
         /// <summary>

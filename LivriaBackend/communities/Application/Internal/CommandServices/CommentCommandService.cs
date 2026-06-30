@@ -50,8 +50,9 @@ namespace LivriaBackend.communities.Application.Internal.CommandServices
             var newComment = new Comment(
                 command.PostId,
                 command.UserId,
-                userClient.Username, 
-                command.Content
+                userClient.Username,
+                command.Content,
+                command.Img
             );
 
             await _commentRepository.AddAsync(newComment);
