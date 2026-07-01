@@ -1,6 +1,5 @@
-# MySQL local para Livria (desarrollo). Uso:
-#   docker compose up -d
-# Contraseña de root: coincide con ConnectionStrings:DefaultConnection en user secrets.
+# MySQL local estándar (livriadb, puerto 3306). NO usar para experimental.
+# Experimental: docker compose -f docker-compose.experimental.yml up -d
 services:
   mysql:
     image: mysql:8.4
