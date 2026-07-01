@@ -41,6 +41,9 @@ $parts = $baseConn -split ';' | Where-Object {
 }
 $cleanBase = ($parts -join ';').TrimEnd(';') + ';'
 $finalConn = "${cleanBase}database=${dbName};"
+if ($finalConn -notmatch '(?i)allow\s*user\s*variables\s*=') {
+    $finalConn = "${finalConn}Allow User Variables=True;"
+}
 
 Write-Host "=== Migracion Livria experimental ===" -ForegroundColor Cyan
 Write-Host "DbName: $dbName"

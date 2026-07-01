@@ -32,7 +32,22 @@ public static class LivriaConnectionString
                 "Revisa .env (ConnectionStrings__DbName) y quita Database= de DefaultConnection / user-secrets.");
         }
 
-        return $"{cleaned}database={targetDb};";
+        var connection = $"{cleaned}database={targetDb};";
+        return EnsureAllowUserVariables(connection);
+    }
+
+    /// <summary>
+    /// Migraciones idempotentes usan variables MySQL (@var, PREPARE). Requiere Allow User Variables=True.
+    /// </summary>
+    public static string EnsureAllowUserVariables(string connectionString)
+    {
+        if (Regex.IsMatch(connectionString, @"(?i)allow\s*user\s*variables\s*="))
+            return connectionString;
+
+        if (!connectionString.EndsWith(';'))
+            connectionString += ";";
+
+        return $"{connectionString}Allow User Variables=True;";
     }
 
     public static string StripDatabaseKey(string connectionString)
