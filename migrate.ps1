@@ -1,17 +1,17 @@
-# Aplica migraciones EF contra livriadb_experimental (puerto 3307).
-# Requiere: .env en la raíz, MySQL experimental levantado.
+# Aplica migraciones EF contra livriadb_experimental.
+# Carga .env, arma la connection string (sin Database duplicado) y la pasa a dotnet ef.
 #
-#   docker compose -f docker-compose.experimental.yml up -d
 #   .\migrate.ps1
 
 $ErrorActionPreference = "Stop"
 $Root = $PSScriptRoot
+$EnvFile = Join-Path $Root ".env"
 
-if (-not (Test-Path (Join-Path $Root ".env"))) {
-    Write-Error "Falta .env en $Root. Copia .env.example → .env"
+if (-not (Test-Path $EnvFile)) {
+    Write-Error "Falta .env en $Root. Copia .env.example -> .env"
 }
 
-Get-Content (Join-Path $Root ".env") | ForEach-Object {
+Get-Content $EnvFile | ForEach-Object {
     if ($_ -match '^\s*([^#=]+)=(.*)$') {
         $name = $matches[1].Trim()
         $value = $matches[2].Trim()
@@ -20,19 +20,47 @@ Get-Content (Join-Path $Root ".env") | ForEach-Object {
 }
 
 $dbName = $env:ConnectionStrings__DbName
-if ($dbName -ne "livriadb_experimental") {
-    Write-Warning "ConnectionStrings__DbName=$dbName (esperado: livriadb_experimental)"
+$baseConn = $env:ConnectionStrings__DefaultConnection
+
+if ([string]::IsNullOrWhiteSpace($dbName)) {
+    Write-Error "ConnectionStrings__DbName vacío en .env"
 }
 
-Write-Host "Migrando hacia: $dbName en $($env:ConnectionStrings__DefaultConnection)" -ForegroundColor Cyan
+if ($dbName -eq "livriadb") {
+    Write-Error @"
+DbName es 'livriadb'. Este repo es experimental: usa livriadb_experimental.
+  - En .env: ConnectionStrings__DbName=livriadb_experimental
+  - DefaultConnection NO debe incluir Database=...
+  - Limpia user-secrets: dotnet user-secrets clear --project LivriaBackend
+"@
+}
+
+# Quitar Database/Initial Catalog existente (user-secrets suele traer Database=livriadb)
+$parts = $baseConn -split ';' | Where-Object {
+    $_ -and ($_ -notmatch '^\s*(database|initial\s*catalog)\s*=')
+}
+$cleanBase = ($parts -join ';').TrimEnd(';') + ';'
+$finalConn = "${cleanBase}database=${dbName};"
+
+Write-Host "=== Migracion Livria experimental ===" -ForegroundColor Cyan
+Write-Host "DbName: $dbName"
+Write-Host "Base:   $cleanBase"
+Write-Host ""
+
+if ($dbName -ne "livriadb_experimental") {
+    Write-Warning "DbName=$dbName (esperado: livriadb_experimental)"
+}
 
 Push-Location (Join-Path $Root "LivriaBackend")
 try {
-    dotnet ef database update --project LivriaBackend.csproj
+    dotnet ef database update `
+        --project LivriaBackend.csproj `
+        --connection $finalConn
     if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 }
 finally {
     Pop-Location
 }
 
-Write-Host "Migraciones OK en livriadb_experimental." -ForegroundColor Green
+Write-Host ""
+Write-Host "OK: migraciones aplicadas en '$dbName'." -ForegroundColor Green

@@ -71,10 +71,9 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using LivriaBackend.IAM.Application.Internal.CommandServices;
 using LivriaBackend.IAM.Domain.Model.Aggregates;
-using DotNetEnv;
 
-// Carga .env desde el directorio actual o padres (raíz del repo).
-Env.TraversePath().Load();
+// Carga .env desde la raíz del repo experimental.
+LivriaEnvLoader.Load();
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -145,15 +144,9 @@ builder.Services.AddCors(options =>
 // Conexión con base de datos (con variable de sistema)
 var baseCredentials = builder.Configuration.GetConnectionString("DefaultConnection");
 var dbName = builder.Configuration.GetConnectionString("DbName");
-
-var finalConnectionString = $"{baseCredentials}database={dbName};";
-
-if (string.IsNullOrWhiteSpace(baseCredentials))
-    throw new InvalidOperationException(
-        "ConnectionStrings:DefaultConnection is missing or empty. Configure user secrets or environment variables, e.g. dotnet user-secrets set \"ConnectionStrings:DefaultConnection\" \"Server=127.0.0.1;Port=3306;User ID=root;Password=...;\" --project LivriaBackend. For Azure Database for MySQL include SslMode=Required (see DEPLOY-AZURE.md in repo root).");
-
-if (string.IsNullOrWhiteSpace(dbName))
-    throw new InvalidOperationException("ConnectionStrings:DbName is missing or empty.");
+var finalConnectionString = LivriaConnectionString.Build(baseCredentials, dbName);
+Console.WriteLine($"[Livria] DbName: {dbName}");
+Console.WriteLine($"[Livria] Connection: {LivriaConnectionString.RedactForLog(finalConnectionString)}");
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseMySQL(finalConnectionString));
