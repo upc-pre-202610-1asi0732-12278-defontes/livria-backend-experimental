@@ -125,7 +125,7 @@ namespace LivriaBackend.commerce.Domain.Model.Aggregates
         /// <param name="isDelivery">Indica si la orden requiere envío a domicilio.</param>
         /// <param name="shipping">Los detalles de envío (debe ser null si <paramref name="isDelivery"/> es falso).</param>
         /// <param name="orderItems">La lista de ítems que componen la orden.</param>
-        /// <param name="status">El estado inicial de la orden ('pending', 'in progress' o 'delivered').</param>
+        /// <param name="status">El estado inicial de la orden ('pending', 'in progress' o 'delivered'). Si el pago es wallet, se fuerza 'in progress'.</param>
         /// <exception cref="ArgumentOutOfRangeException">Se lanza si el UserClient ID no es positivo.</exception>
         /// <exception cref="ArgumentNullException">Se lanza si UserEmail, UserPhone, UserFullName o RecipientName son nulos o vacíos.</exception>
         /// <exception cref="ArgumentException">
@@ -154,11 +154,6 @@ namespace LivriaBackend.commerce.Domain.Model.Aggregates
             if (isDelivery && shipping == null) throw new ArgumentException("Shipping details are required for delivery orders.", nameof(shipping));
             if (!isDelivery && shipping != null) throw new ArgumentException("Shipping details should be null for non-delivery orders.", nameof(shipping));
 
-            if (string.IsNullOrWhiteSpace(status) || !AllowedStatuses.Contains(status))
-            {
-                throw new ArgumentException($"El estado de la orden debe ser '{string.Join("' o '", AllowedStatuses)}'.", nameof(status));
-            }
-
             var normalizedPaymentMethod = string.IsNullOrWhiteSpace(paymentMethod)
                 ? "external"
                 : paymentMethod.Trim().ToLowerInvariant();
@@ -167,12 +162,18 @@ namespace LivriaBackend.commerce.Domain.Model.Aggregates
                 throw new ArgumentException("Payment method must be 'wallet' or 'external'.", nameof(paymentMethod));
             }
 
+            var effectiveStatus = normalizedPaymentMethod == "wallet" ? "in progress" : status;
+            if (string.IsNullOrWhiteSpace(effectiveStatus) || !AllowedStatuses.Contains(effectiveStatus))
+            {
+                throw new ArgumentException($"El estado de la orden debe ser '{string.Join("' o '", AllowedStatuses)}'.", nameof(status));
+            }
+
             UserClientId = userClientId;
             UserEmail = userEmail;
             UserPhone = userPhone;
             UserFullName = userFullName;
             RecipientName = recipientName;
-            Status = status;
+            Status = effectiveStatus;
             PaymentMethod = normalizedPaymentMethod;
             IsDelivery = isDelivery;
             Shipping = shipping;
