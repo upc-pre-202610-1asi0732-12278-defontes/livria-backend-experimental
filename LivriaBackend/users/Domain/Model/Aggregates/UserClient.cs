@@ -153,8 +153,9 @@ namespace LivriaBackend.users.Domain.Model.Aggregates
             Subscription = newSubscriptionPlan;
             PlanChangeDate = DateTime.UtcNow;
     
-            // Si vuelve a freeplan, resetea el pago
-            if (newSubscriptionPlan == "freeplan")
+            if (newSubscriptionPlan == "communityplan")
+                HasPayed = true;
+            else if (newSubscriptionPlan == "freeplan")
                 HasPayed = false;
         }
         public void SetHasPayed(bool hasPayed)
