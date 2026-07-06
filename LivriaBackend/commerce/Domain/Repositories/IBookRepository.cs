@@ -49,5 +49,7 @@ namespace LivriaBackend.commerce.Domain.Repositories
         Task<bool> ExistsByTitleAndAuthorAsync(string title, string author);
 
         Task<IEnumerable<Book>> GetAllDeletedAsync();
+
+        Task<IEnumerable<Book>> GetByGenreAsync(string genre);
     }
 }

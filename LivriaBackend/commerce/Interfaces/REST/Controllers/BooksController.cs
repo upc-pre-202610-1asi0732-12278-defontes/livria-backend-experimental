@@ -78,6 +78,20 @@ namespace LivriaBackend.commerce.Interfaces.REST.Controllers
             return Ok(bookResources);
         }
         
+        [AllowAnonymous]
+        [HttpGet("genre/{genre}")]
+        [SwaggerOperation(
+            Summary = "Obtener libros por género.",
+            Description = "Devuelve todos los libros que pertenecen a un género específico."
+        )]
+        public async Task<ActionResult<IEnumerable<BookResource>>> GetBooksByGenre(string genre)
+        {
+            var query = new GetBooksByGenreQuery(genre);
+            var books = await _bookQueryService.Handle(query);
+            var bookResources = _mapper.Map<IEnumerable<BookResource>>(books);
+            return Ok(bookResources);
+        }
+
         /// <summary>
         /// Obtiene los datos de un libro específico por su identificador único.
         /// </summary>

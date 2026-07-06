@@ -106,5 +106,12 @@ namespace LivriaBackend.commerce.Infrastructure.Repositories
                 .Where(b => !b.IsActive)
                 .ToListAsync();
         }
+
+        public async Task<IEnumerable<Book>> GetByGenreAsync(string genre)
+        {
+            return await this.Context.Books
+                .Where(b => b.Genre == genre)
+                .ToListAsync();
+        }
     }
 }

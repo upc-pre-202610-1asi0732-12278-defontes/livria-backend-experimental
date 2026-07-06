@@ -55,5 +55,10 @@ namespace LivriaBackend.commerce.Application.Internal.QueryServices
         {
             return await _bookRepository.GetAllDeletedAsync();
         }
+
+        public async Task<IEnumerable<Book>> Handle(GetBooksByGenreQuery query)
+        {
+            return await _bookRepository.GetByGenreAsync(query.Genre);
+        }
     }
 }
