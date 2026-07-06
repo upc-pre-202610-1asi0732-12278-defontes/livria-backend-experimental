@@ -124,7 +124,7 @@ namespace LivriaBackend.commerce.Domain.Model.Aggregates
             
             PurchasePrice = GenerateRandomPurchasePrice(genre);
             
-            SalePrice = PurchasePrice * 1.65m;
+            SalePrice = Math.Round(PurchasePrice * 1.65m, 1, MidpointRounding.AwayFromZero);
 
             IsActive = true;
         }
@@ -173,7 +173,8 @@ namespace LivriaBackend.commerce.Domain.Model.Aggregates
             }
             
             int randomInt = _random.Next(Convert.ToInt32(minPrice * 100), Convert.ToInt32(maxPrice * 100 + 1));
-            return (decimal)randomInt / 100m;
+            var price = (decimal)randomInt / 100m;
+            return Math.Round(price, 1, MidpointRounding.AwayFromZero);
         }
 
         /// <summary>
@@ -251,7 +252,7 @@ namespace LivriaBackend.commerce.Domain.Model.Aggregates
             Description = description;
             Author = author;
             PurchasePrice = purchasePrice;
-            SalePrice = PurchasePrice * 1.65m; 
+            SalePrice = Math.Round(PurchasePrice * 1.65m, 1, MidpointRounding.AwayFromZero);
             Cover = cover;
             Genre = genre;
             Language = language;
