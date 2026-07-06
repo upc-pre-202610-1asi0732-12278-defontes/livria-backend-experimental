@@ -94,7 +94,7 @@ namespace LivriaBackend.commerce.Domain.Model.Aggregates
         
         private static readonly HashSet<string> AllowedStatuses = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
         {
-            "in progress", "pending", "delivered"
+            "in progress", "pending", "delivered", "approved"
         };
 
         /// <summary>
@@ -162,7 +162,7 @@ namespace LivriaBackend.commerce.Domain.Model.Aggregates
                 throw new ArgumentException("Payment method must be 'wallet' or 'external'.", nameof(paymentMethod));
             }
 
-            var effectiveStatus = normalizedPaymentMethod == "wallet" ? "in progress" : status;
+            var effectiveStatus = normalizedPaymentMethod == "wallet" ? "approved" : status;
             if (string.IsNullOrWhiteSpace(effectiveStatus) || !AllowedStatuses.Contains(effectiveStatus))
             {
                 throw new ArgumentException($"El estado de la orden debe ser '{string.Join("' o '", AllowedStatuses)}'.", nameof(status));
@@ -217,7 +217,7 @@ namespace LivriaBackend.commerce.Domain.Model.Aggregates
         /// Actualiza el estado de la orden.
         /// </summary>
         /// <param name="newStatus">El nuevo estado de la orden.</param>
-        /// <exception cref="ArgumentException">Se lanza si el nuevo estado no es 'pending', 'in progress' o 'delivered'.</exception>
+        /// <exception cref="ArgumentException">Se lanza si el nuevo estado no es válido.</exception>
         public void UpdateStatus(string newStatus)
         {
             if (string.IsNullOrWhiteSpace(newStatus) || !AllowedStatuses.Contains(newStatus))
@@ -225,6 +225,22 @@ namespace LivriaBackend.commerce.Domain.Model.Aggregates
                 throw new ArgumentException($"El estado de la orden debe ser '{string.Join("' o '", AllowedStatuses)}'.", nameof(newStatus));
             }
             Status = newStatus;
+        }
+
+        /// <summary>
+        /// Marca la orden como pagada con wallet.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">Se lanza si la orden no está en estado 'pending' o ya fue pagada con wallet.</exception>
+        public void PayWithWallet()
+        {
+            if (PaymentMethod == "wallet")
+                throw new InvalidOperationException("The order was already paid with wallet.");
+
+            if (!string.Equals(Status, "pending", StringComparison.OrdinalIgnoreCase))
+                throw new InvalidOperationException("Only orders with 'pending' status can be paid with wallet.");
+
+            PaymentMethod = "wallet";
+            Status = "approved";
         }
     }
 }

@@ -75,6 +75,29 @@ namespace LivriaBackend.wallet.Domain.Model.Aggregates
             };
         }
 
+        public static WalletTransaction CreateSubscriptionPayment(int userClientId, decimal amount, string reference)
+        {
+            if (userClientId <= 0)
+                throw new ArgumentException("UserClientId must be positive.", nameof(userClientId));
+            if (amount <= 0)
+                throw new ArgumentException("Amount must be positive.", nameof(amount));
+            if (string.IsNullOrWhiteSpace(reference))
+                throw new ArgumentException("Reference is required.", nameof(reference));
+
+            return new WalletTransaction
+            {
+                UserClientId = userClientId,
+                Amount = amount,
+                Type = EWalletTransactionType.Subscription,
+                Status = EWalletTransactionStatus.Completed,
+                Reference = reference.Trim(),
+                ProofUrl = string.Empty,
+                OrderId = null,
+                CreatedAt = DateTime.UtcNow,
+                ProcessedAt = DateTime.UtcNow
+            };
+        }
+
         public void Approve()
         {
             if (Type != EWalletTransactionType.Recharge)

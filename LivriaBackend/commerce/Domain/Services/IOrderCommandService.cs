@@ -29,5 +29,15 @@ namespace LivriaBackend.commerce.Domain.Model.Services
         /// El resultado de la tarea es el objeto <see cref="Order"/> actualizado, o <c>null</c> si la orden no se encuentra.
         /// </returns>
         Task<Order?> Handle(UpdateOrderStatusCommand command);
+
+        /// <summary>
+        /// Maneja el comando para pagar una orden con wallet.
+        /// </summary>
+        /// <param name="command">El comando <see cref="PayOrderWithWalletCommand"/> que contiene el ID de la orden.</param>
+        /// <returns>
+        /// Una tarea que representa la operación asíncrona.
+        /// El resultado de la tarea es el objeto <see cref="Order"/> actualizado, o <c>null</c> si la orden no se encuentra.
+        /// </returns>
+        Task<Order?> Handle(PayOrderWithWalletCommand command);
     }
 }

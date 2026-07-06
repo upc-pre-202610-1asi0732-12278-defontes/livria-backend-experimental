@@ -331,7 +331,6 @@ namespace LivriaBackend.users.Application.Internal.CommandServices
         /// </exception>
         public async Task<UserClient> Handle(UpdateUserClientSubscriptionCommand command)
         {
-            
             var userClient = await _userClientRepository.GetByIdAsync(command.UserClientId);
             if (userClient == null)
             {
@@ -339,26 +338,24 @@ namespace LivriaBackend.users.Application.Internal.CommandServices
             }
 
             var oldSubscription = userClient.Subscription;
-            
-            
+
             if (command.NewSubscriptionPlan != "freeplan" && command.NewSubscriptionPlan != "communityplan")
             {
                 throw new ArgumentException("Invalid subscription plan. Must be 'freeplan' or 'communityplan'.");
             }
-            
+
             userClient.UpdateSubscription(command.NewSubscriptionPlan);
 
             await _userClientRepository.UpdateAsync(userClient);
             await _unitOfWork.CompleteAsync();
-            
+
             if (oldSubscription != "communityplan" && userClient.Subscription == "communityplan")
             {
                 await _notificationCommandService.Handle(new CreateNotificationCommand(
-                    userClient.Id,       
-                    ENotificationType.Plan, 
-                    DateTime.UtcNow      
-                ));
-                
+                    userClient.Id,
+                    ENotificationType.Plan,
+                    DateTime.UtcNow));
+
                 var userAdmins = await _userAdminRepository.GetAllAsync();
                 var admin = userAdmins.FirstOrDefault();
 

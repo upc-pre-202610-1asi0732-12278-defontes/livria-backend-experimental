@@ -5,6 +5,7 @@ namespace LivriaBackend.wallet.Domain.Model.ValueObjects
         Recharge,
         Purchase,
         Refund,
-        AdminAdjustment
+        AdminAdjustment,
+        Subscription
     }
 }

@@ -200,7 +200,7 @@ namespace LivriaBackend.commerce.Interfaces.REST.Controllers
         [HttpPut("{orderId}/status")] 
         [SwaggerOperation(
             Summary = "Actualizar el estado de una orden.",
-            Description = "Permite cambiar el estado de una orden a 'pending', 'in progress' o 'delivered'."
+            Description = "Permite cambiar el estado de una orden a 'pending', 'in progress', 'approved' o 'delivered'."
         )]
         [ProducesResponseType(typeof(OrderResource), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -234,6 +234,51 @@ namespace LivriaBackend.commerce.Interfaces.REST.Controllers
             catch (Exception ex)
             {
                 return StatusCode(500, new { message = "An unexpected error occurred while updating order status: " + ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Paga una orden pendiente usando la billetera (wallet) del usuario.
+        /// </summary>
+        /// <param name="orderId">El identificador único de la orden a pagar.</param>
+        /// <returns>
+        /// Una acción de resultado HTTP que contiene el <see cref="OrderResource"/> actualizado
+        /// si la operación fue exitosa (código 200 OK).
+        /// Retorna 400 Bad Request si no hay saldo suficiente o la orden no está pendiente.
+        /// Retorna 404 Not Found si la orden no existe.
+        /// </returns>
+        [HttpPost("{orderId}/pay-with-wallet")]
+        [SwaggerOperation(
+            Summary = "Pagar una orden con wallet.",
+            Description = "Permite pagar una orden pendiente usando el saldo de la billetera del usuario. La orden pasa a estado 'approved'."
+        )]
+        [ProducesResponseType(typeof(OrderResource), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> PayOrderWithWallet(int orderId)
+        {
+            var command = new PayOrderWithWalletCommand(orderId);
+
+            try
+            {
+                var updatedOrder = await _orderCommandService.Handle(command);
+
+                if (updatedOrder == null)
+                {
+                    return NotFound(new { message = $"Order with ID {orderId} not found." });
+                }
+
+                var orderResource = _mapper.Map<OrderResource>(updatedOrder);
+                return Ok(orderResource);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An unexpected error occurred while paying the order: " + ex.Message });
             }
         }
     }

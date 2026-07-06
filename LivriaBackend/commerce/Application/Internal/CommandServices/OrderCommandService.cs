@@ -223,7 +223,7 @@ namespace LivriaBackend.commerce.Application.Internal.CommandServices
         /// </summary>
         /// <param name="command">El comando que contiene el ID de la orden y el nuevo estado.</param>
         /// <returns>El objeto <see cref="Order"/> actualizado, o <c>null</c> si la orden no se encuentra.</returns>
-        /// <exception cref="ArgumentException">Se lanza si el nuevo estado no es 'pending', 'in progress' o 'delivered'.</exception>
+        /// <exception cref="ArgumentException">Se lanza si el nuevo estado no es válido.</exception>
         public async Task<Order?> Handle(UpdateOrderStatusCommand command)
         {
             var order = await _orderRepository.GetByIdAsync(command.OrderId);
@@ -235,6 +235,46 @@ namespace LivriaBackend.commerce.Application.Internal.CommandServices
             order.UpdateStatus(command.Status);
 
             await _unitOfWork.CompleteAsync();
+            return order;
+        }
+
+        /// <summary>
+        /// Maneja el comando <see cref="PayOrderWithWalletCommand"/> para pagar una orden pendiente con wallet.
+        /// </summary>
+        /// <param name="command">El comando que contiene el ID de la orden.</param>
+        /// <returns>El objeto <see cref="Order"/> actualizado, o <c>null</c> si la orden no se encuentra.</returns>
+        public async Task<Order?> Handle(PayOrderWithWalletCommand command)
+        {
+            var order = await _orderRepository.GetByIdAsync(command.OrderId);
+            if (order == null)
+                return null;
+
+            var userClient = await _userClientRepository.GetByIdAsync(order.UserClientId);
+            if (userClient == null)
+                throw new InvalidOperationException($"UserClient with ID {order.UserClientId} not found.");
+
+            order.PayWithWallet();
+
+            if (!userClient.HasSufficientWalletBalance(order.Total))
+                throw new InvalidOperationException(
+                    $"Insufficient wallet balance. Required: {order.Total:F2}, Available: {userClient.Wallet:F2}.");
+
+            userClient.DebitWallet(order.Total);
+            await _userClientRepository.UpdateAsync(userClient);
+
+            var purchaseTransaction = WalletTransaction.CreatePurchase(
+                order.UserClientId,
+                order.Total,
+                order.Code);
+            await _walletTransactionRepository.AddAsync(purchaseTransaction);
+
+            await _unitOfWork.CompleteAsync();
+
+            await _notificationCommandService.Handle(new CreateNotificationCommand(
+                order.UserClientId,
+                ENotificationType.Order,
+                DateTime.UtcNow));
+
             return order;
         }
     }
