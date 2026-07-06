@@ -51,5 +51,7 @@ namespace LivriaBackend.commerce.Domain.Repositories
         Task<IEnumerable<Book>> GetAllDeletedAsync();
 
         Task<IEnumerable<Book>> GetByGenreAsync(string genre);
+
+        Task<IEnumerable<Book>> GetRandomAsync(int count, List<int> excludeIds);
     }
 }

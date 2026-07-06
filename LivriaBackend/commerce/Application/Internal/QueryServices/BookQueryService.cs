@@ -3,6 +3,7 @@ using LivriaBackend.commerce.Domain.Model.Queries;
 using LivriaBackend.commerce.Domain.Repositories;
 using LivriaBackend.commerce.Domain.Model.Services;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore; 
 
@@ -59,6 +60,13 @@ namespace LivriaBackend.commerce.Application.Internal.QueryServices
         public async Task<IEnumerable<Book>> Handle(GetBooksByGenreQuery query)
         {
             return await _bookRepository.GetByGenreAsync(query.Genre);
+        }
+
+        public async Task<IEnumerable<Book>> Handle(GetRandomBooksQuery query)
+        {
+            var count = Math.Clamp(query.Count, 1, 20);
+            var excludeIds = query.Exclude ?? new List<int>();
+            return await _bookRepository.GetRandomAsync(count, excludeIds);
         }
     }
 }

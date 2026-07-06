@@ -3,8 +3,9 @@ using LivriaBackend.commerce.Domain.Repositories;
 using LivriaBackend.shared.Infrastructure.Persistence.EFC.Configuration;
 using LivriaBackend.shared.Infrastructure.Persistence.EFC.Repositories;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
-using System.Linq; 
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace LivriaBackend.commerce.Infrastructure.Repositories
@@ -112,6 +113,19 @@ namespace LivriaBackend.commerce.Infrastructure.Repositories
             return await this.Context.Books
                 .Where(b => b.Genre == genre)
                 .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Book>> GetRandomAsync(int count, List<int> excludeIds)
+        {
+            var query = this.Context.Books.AsQueryable();
+
+            if (excludeIds != null && excludeIds.Count > 0)
+                query = query.Where(b => !excludeIds.Contains(b.Id));
+
+            var books = await query.ToListAsync();
+
+            var rng = new Random();
+            return books.OrderBy(_ => rng.Next()).Take(count).ToList();
         }
     }
 }

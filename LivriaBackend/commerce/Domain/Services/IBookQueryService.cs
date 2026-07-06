@@ -11,5 +11,6 @@ namespace LivriaBackend.commerce.Domain.Model.Services
         Task<IEnumerable<Book>> Handle(GetAllBooksQuery query);
         Task<IEnumerable<Book>> Handle(GetDeletedBooksQuery query);
         Task<IEnumerable<Book>> Handle(GetBooksByGenreQuery query);
+        Task<IEnumerable<Book>> Handle(GetRandomBooksQuery query);
     }
 }

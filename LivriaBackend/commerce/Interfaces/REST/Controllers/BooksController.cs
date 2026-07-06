@@ -79,6 +79,26 @@ namespace LivriaBackend.commerce.Interfaces.REST.Controllers
         }
         
         [AllowAnonymous]
+        [HttpGet("random")]
+        [SwaggerOperation(
+            Summary = "Obtener libros aleatorios.",
+            Description = "Devuelve una cantidad específica de libros aleatorios, con opción de excluir IDs."
+        )]
+        public async Task<ActionResult<IEnumerable<BookResource>>> GetRandomBooks(
+            [FromQuery] int count = 10,
+            [FromQuery] string? exclude = null)
+        {
+            var excludeIds = string.IsNullOrWhiteSpace(exclude)
+                ? null
+                : exclude.Split(',').Select(int.Parse).ToList();
+
+            var query = new GetRandomBooksQuery(count, excludeIds);
+            var books = await _bookQueryService.Handle(query);
+            var bookResources = _mapper.Map<IEnumerable<BookResource>>(books);
+            return Ok(bookResources);
+        }
+
+        [AllowAnonymous]
         [HttpGet("genre/{genre}")]
         [SwaggerOperation(
             Summary = "Obtener libros por género.",
