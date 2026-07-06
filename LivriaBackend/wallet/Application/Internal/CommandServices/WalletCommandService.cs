@@ -58,6 +58,7 @@ namespace LivriaBackend.wallet.Application.Internal.CommandServices
 
             transaction.Approve();
             userClient.CreditWallet(transaction.Amount);
+            userClient.SetHasPayed(true);
             await _userClientRepository.UpdateAsync(userClient);
             await _walletTransactionRepository.UpdateAsync(transaction);
             await _unitOfWork.CompleteAsync();
