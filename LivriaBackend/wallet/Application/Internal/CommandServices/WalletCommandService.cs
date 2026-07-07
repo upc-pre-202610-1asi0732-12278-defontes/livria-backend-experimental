@@ -1,3 +1,4 @@
+using System.Linq;
 using LivriaBackend.notifications.Domain.Model.Commands;
 using LivriaBackend.notifications.Domain.Model.Services;
 using LivriaBackend.notifications.Domain.Model.ValueObjects;
@@ -14,17 +15,20 @@ namespace LivriaBackend.wallet.Application.Internal.CommandServices
     {
         private readonly IWalletTransactionRepository _walletTransactionRepository;
         private readonly IUserClientRepository _userClientRepository;
+        private readonly IUserAdminRepository _userAdminRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly INotificationCommandService _notificationCommandService;
 
         public WalletCommandService(
             IWalletTransactionRepository walletTransactionRepository,
             IUserClientRepository userClientRepository,
+            IUserAdminRepository userAdminRepository,
             IUnitOfWork unitOfWork,
             INotificationCommandService notificationCommandService)
         {
             _walletTransactionRepository = walletTransactionRepository;
             _userClientRepository = userClientRepository;
+            _userAdminRepository = userAdminRepository;
             _unitOfWork = unitOfWork;
             _notificationCommandService = notificationCommandService;
         }
@@ -98,6 +102,47 @@ namespace LivriaBackend.wallet.Application.Internal.CommandServices
             await _userClientRepository.UpdateAsync(userClient);
             await _walletTransactionRepository.AddAsync(transaction);
             await _unitOfWork.CompleteAsync();
+            return transaction;
+        }
+
+        public async Task<WalletTransaction> Handle(PaySubscriptionWithWalletCommand command)
+        {
+            var userClient = await _userClientRepository.GetByIdAsync(command.UserClientId);
+            if (userClient == null)
+                throw new ArgumentException($"UserClient with ID {command.UserClientId} not found.", nameof(command.UserClientId));
+
+            if (userClient.Subscription != "communityplan")
+                throw new InvalidOperationException("User does not have a community plan subscription.");
+
+            if (!userClient.HasSufficientWalletBalance(command.Amount))
+                throw new InvalidOperationException("Insufficient wallet balance to pay subscription.");
+
+            userClient.DebitWallet(command.Amount);
+            userClient.SetHasPayed(true);
+
+            var reference = $"SUB-{command.UserClientId}-{DateTime.UtcNow:yyyyMMddHHmmss}";
+            var transaction = WalletTransaction.CreateSubscriptionPayment(
+                command.UserClientId,
+                command.Amount,
+                reference);
+
+            var userAdmins = await _userAdminRepository.GetAllAsync();
+            var admin = userAdmins.FirstOrDefault();
+            if (admin != null)
+            {
+                admin.AddCapital(command.Amount);
+                await _userAdminRepository.UpdateAsync(admin);
+            }
+
+            await _userClientRepository.UpdateAsync(userClient);
+            await _walletTransactionRepository.AddAsync(transaction);
+            await _unitOfWork.CompleteAsync();
+
+            await _notificationCommandService.Handle(new CreateNotificationCommand(
+                command.UserClientId,
+                ENotificationType.Plan,
+                DateTime.UtcNow));
+
             return transaction;
         }
     }

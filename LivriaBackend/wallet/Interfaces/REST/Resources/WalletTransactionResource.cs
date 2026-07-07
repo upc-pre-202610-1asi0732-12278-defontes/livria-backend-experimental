@@ -27,4 +27,8 @@ namespace LivriaBackend.wallet.Interfaces.REST.Resources
     public record RejectRechargeRequestResource(
         [StringLength(500)] string? AdminNote
     );
+
+    public record PaySubscriptionResource(
+        [Required][Range(0.01, double.MaxValue)] decimal Amount
+    );
 }

@@ -272,6 +272,7 @@ builder.WebHost.ConfigureKestrel(serverOptions =>
     serverOptions.ListenAnyIP(5119); // Desarrollo local / mismo puerto que launchSettings
 });
 builder.Services.AddHostedService<SubscriptionExpirationService>();
+builder.Services.AddHostedService<SubscriptionPaymentResetService>();
 var app = builder.Build();
 
 app.UseRequestLocalization(localizationOptions);

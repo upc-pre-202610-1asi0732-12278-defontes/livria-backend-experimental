@@ -9,5 +9,6 @@ namespace LivriaBackend.wallet.Domain.Services
         Task<WalletTransaction?> Handle(ApproveRechargeRequestCommand command);
         Task<WalletTransaction?> Handle(RejectRechargeRequestCommand command);
         Task<WalletTransaction> Handle(DebitWalletForPurchaseCommand command);
+        Task<WalletTransaction> Handle(PaySubscriptionWithWalletCommand command);
     }
 }
