@@ -2,7 +2,6 @@
 using Microsoft.EntityFrameworkCore;
 using LivriaBackend.IAM.Domain.Model.Aggregates;
 using LivriaBackend.IAM.Domain.Repositories;
-// Quita el using de IAM.Infrastructure.Persistence.Contexts si lo tenías
 using LivriaBackend.shared.Infrastructure.Persistence.EFC.Configuration; 
 
 namespace LivriaBackend.IAM.Infrastructure.Persistence.Repositories
