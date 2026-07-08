@@ -18,4 +18,4 @@ services:
       retries: 20
 
 volumes:
-  livria_mysql_data:  
+  livria_mysql_data:   
