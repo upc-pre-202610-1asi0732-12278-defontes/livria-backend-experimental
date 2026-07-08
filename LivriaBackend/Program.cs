@@ -9,9 +9,6 @@ using LivriaBackend.users.Interfaces.REST.Transform;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 
-
-
-
 using AutoMapper;
 
 using LivriaBackend.users.Application.Internal.CommandServices;
