@@ -180,6 +180,33 @@ namespace LivriaBackend.wallet.Interfaces.REST.Controllers
             }
         }
 
+        [HttpPost("{userClientId:int}/upgrade-to-community")]
+        [SwaggerOperation(
+            Summary = "Upgrade freeplan → communityplan pagando con wallet.",
+            Description = "Solo freeplan. Si hay saldo suficiente: debita wallet, cambia a communityplan, HasPayed=true, acredita al admin. Si no hay saldo, el cliente debe usar transferencia (solicitud al admin).")]
+        [ProducesResponseType(typeof(WalletTransactionResource), 200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+        public async Task<ActionResult<WalletTransactionResource>> UpgradeToCommunity(
+            int userClientId,
+            [FromBody] UpgradeToCommunityResource resource)
+        {
+            try
+            {
+                var transaction = await _walletCommandService.Handle(
+                    new UpgradeToCommunityWithWalletCommand(userClientId, resource.Amount));
+                return Ok(_mapper.Map<WalletTransactionResource>(transaction));
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
         [HttpPatch("recharge-requests/{id:int}/reject")]
         [Authorize(Roles = "Admin")]
         [SwaggerOperation(Summary = "Rechazar solicitud de recarga (admin).")]

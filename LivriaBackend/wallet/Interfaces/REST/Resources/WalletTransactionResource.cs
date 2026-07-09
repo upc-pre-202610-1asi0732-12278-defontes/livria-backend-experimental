@@ -31,4 +31,11 @@ namespace LivriaBackend.wallet.Interfaces.REST.Resources
     public record PaySubscriptionResource(
         [Required][Range(0.01, double.MaxValue)] decimal Amount
     );
+
+    /// <summary>
+    /// Body para upgrade inicial free → community pagando con wallet.
+    /// </summary>
+    public record UpgradeToCommunityResource(
+        [Required][Range(0.01, double.MaxValue)] decimal Amount
+    );
 }

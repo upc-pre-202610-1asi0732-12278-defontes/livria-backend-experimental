@@ -62,7 +62,7 @@ namespace LivriaBackend.wallet.Application.Internal.CommandServices
 
             transaction.Approve();
             userClient.CreditWallet(transaction.Amount);
-            userClient.SetHasPayed(true);
+            // Recarga de wallet no implica pago de suscripción; HasPayed no se toca.
             await _userClientRepository.UpdateAsync(userClient);
             await _walletTransactionRepository.UpdateAsync(transaction);
             await _unitOfWork.CompleteAsync();
@@ -121,6 +121,51 @@ namespace LivriaBackend.wallet.Application.Internal.CommandServices
             userClient.SetHasPayed(true);
 
             var reference = $"SUB-{command.UserClientId}-{DateTime.UtcNow:yyyyMMddHHmmss}";
+            var transaction = WalletTransaction.CreateSubscriptionPayment(
+                command.UserClientId,
+                command.Amount,
+                reference);
+
+            var userAdmins = await _userAdminRepository.GetAllAsync();
+            var admin = userAdmins.FirstOrDefault();
+            if (admin != null)
+            {
+                admin.AddCapital(command.Amount);
+                await _userAdminRepository.UpdateAsync(admin);
+            }
+
+            await _userClientRepository.UpdateAsync(userClient);
+            await _walletTransactionRepository.AddAsync(transaction);
+            await _unitOfWork.CompleteAsync();
+
+            await _notificationCommandService.Handle(new CreateNotificationCommand(
+                command.UserClientId,
+                ENotificationType.Plan,
+                DateTime.UtcNow));
+
+            return transaction;
+        }
+
+        public async Task<WalletTransaction> Handle(UpgradeToCommunityWithWalletCommand command)
+        {
+            var userClient = await _userClientRepository.GetByIdAsync(command.UserClientId);
+            if (userClient == null)
+                throw new ArgumentException($"UserClient with ID {command.UserClientId} not found.", nameof(command.UserClientId));
+
+            if (userClient.Subscription == "communityplan")
+                throw new InvalidOperationException("User already has a community plan subscription.");
+
+            if (userClient.Subscription != "freeplan")
+                throw new InvalidOperationException("Only freeplan users can upgrade to community plan with wallet.");
+
+            if (!userClient.HasSufficientWalletBalance(command.Amount))
+                throw new InvalidOperationException("Insufficient wallet balance to upgrade to community plan.");
+
+            userClient.DebitWallet(command.Amount);
+            // UpdateSubscription("communityplan") pone HasPayed=true y PlanChangeDate.
+            userClient.UpdateSubscription("communityplan");
+
+            var reference = $"UPG-{command.UserClientId}-{DateTime.UtcNow:yyyyMMddHHmmss}";
             var transaction = WalletTransaction.CreateSubscriptionPayment(
                 command.UserClientId,
                 command.Amount,
